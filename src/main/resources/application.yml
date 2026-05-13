@@ -1,0 +1,8 @@
+spring:
+  application:
+  name: t2
+  data:
+    mongodb:
+      auto-index-creation: true
+  jackson:
+    default-property-inclusion: non_null
