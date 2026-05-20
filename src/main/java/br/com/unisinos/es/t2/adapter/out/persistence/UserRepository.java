@@ -1,15 +1,14 @@
 package br.com.unisinos.es.t2.adapter.out.persistence;
 
+import jakarta.annotation.Nonnull;
 import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
 
-import jakarta.annotation.Nonnull;
-
 interface UserRepository extends MongoRepository<UserEntity, String> {
 
-	Optional<UserEntity> findByIdAndDeletedFalse(String id);
+    Optional<UserEntity> findByIdAndDeletedFalse(String id);
 
     Optional<UserEntity> findByEmailAndDeletedFalse(String email);
 
@@ -17,7 +16,7 @@ interface UserRepository extends MongoRepository<UserEntity, String> {
     @Update("{ $set: { 'deleted': true } }")
     void deleteById(@Nonnull String id);
 
-	boolean existsByIdAndDeletedFalse(String id);
+    boolean existsByIdAndDeletedFalse(String id);
 
     boolean existsByEmailAndDeletedFalse(String email);
 }

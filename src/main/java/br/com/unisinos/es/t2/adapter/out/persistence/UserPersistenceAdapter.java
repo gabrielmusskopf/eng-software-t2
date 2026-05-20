@@ -20,7 +20,7 @@ class UserPersistenceAdapter
                 GetUserByEmailPort,
                 UpdateUserPort,
                 DeleteUserPort,
-		ExistsUserByIdPort,
+                ExistsUserByIdPort,
                 ExistsUserByEmailPort {
 
     private final UserMapper userMapper;
@@ -56,14 +56,13 @@ class UserPersistenceAdapter
         userRepository.deleteById(id);
     }
 
-	@Override
-	public boolean exists(String id) {
-		return userRepository.existsByIdAndDeletedFalse(id);
-	}
+    @Override
+    public boolean exists(String id) {
+        return userRepository.existsByIdAndDeletedFalse(id);
+    }
 
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmailAndDeletedFalse(email);
     }
-
 }
