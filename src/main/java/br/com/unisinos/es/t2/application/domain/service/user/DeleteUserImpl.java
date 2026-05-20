@@ -1,9 +1,9 @@
-package br.com.unisinos.es.t2.application.domain.service;
+package br.com.unisinos.es.t2.application.domain.service.user;
 
 import br.com.unisinos.es.t2.application.domain.exception.NotFoundException;
-import br.com.unisinos.es.t2.application.port.in.DeleteUserService;
-import br.com.unisinos.es.t2.application.port.out.DeleteUserPort;
-import br.com.unisinos.es.t2.application.port.out.ExistsUserByIdPort;
+import br.com.unisinos.es.t2.application.port.in.user.DeleteUserService;
+import br.com.unisinos.es.t2.application.port.out.user.DeleteUserPort;
+import br.com.unisinos.es.t2.application.port.out.user.ExistsUserByIdPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

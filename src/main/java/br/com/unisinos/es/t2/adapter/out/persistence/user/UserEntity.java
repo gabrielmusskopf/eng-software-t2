@@ -1,5 +1,6 @@
-package br.com.unisinos.es.t2.adapter.out.persistence;
+package br.com.unisinos.es.t2.adapter.out.persistence.user;
 
+import br.com.unisinos.es.t2.adapter.out.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

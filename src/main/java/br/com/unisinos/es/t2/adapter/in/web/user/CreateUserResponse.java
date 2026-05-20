@@ -1,4 +1,4 @@
-package br.com.unisinos.es.t2.adapter.in.web;
+package br.com.unisinos.es.t2.adapter.in.web.user;
 
 import lombok.Data;
 

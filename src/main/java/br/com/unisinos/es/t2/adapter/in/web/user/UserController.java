@@ -1,14 +1,15 @@
-package br.com.unisinos.es.t2.adapter.in.web;
+package br.com.unisinos.es.t2.adapter.in.web.user;
 
+import br.com.unisinos.es.t2.adapter.in.web.ApiResponse;
 import br.com.unisinos.es.t2.application.domain.model.User;
-import br.com.unisinos.es.t2.application.port.in.CreateUserService;
-import br.com.unisinos.es.t2.application.port.in.CreateUserService.CreateUserCommand;
-import br.com.unisinos.es.t2.application.port.in.DeleteUserService;
-import br.com.unisinos.es.t2.application.port.in.DeleteUserService.DeleteUserCommand;
-import br.com.unisinos.es.t2.application.port.in.GetUserService;
-import br.com.unisinos.es.t2.application.port.in.GetUserService.GetUserCommand;
-import br.com.unisinos.es.t2.application.port.in.UpdateUserService;
-import br.com.unisinos.es.t2.application.port.in.UpdateUserService.UpdateUserCommand;
+import br.com.unisinos.es.t2.application.port.in.user.CreateUserService;
+import br.com.unisinos.es.t2.application.port.in.user.CreateUserService.CreateUserCommand;
+import br.com.unisinos.es.t2.application.port.in.user.DeleteUserService;
+import br.com.unisinos.es.t2.application.port.in.user.DeleteUserService.DeleteUserCommand;
+import br.com.unisinos.es.t2.application.port.in.user.GetUserService;
+import br.com.unisinos.es.t2.application.port.in.user.GetUserService.GetUserCommand;
+import br.com.unisinos.es.t2.application.port.in.user.UpdateUserService;
+import br.com.unisinos.es.t2.application.port.in.user.UpdateUserService.UpdateUserCommand;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

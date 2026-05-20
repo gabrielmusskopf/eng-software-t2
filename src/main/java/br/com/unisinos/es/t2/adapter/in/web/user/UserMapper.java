@@ -1,4 +1,4 @@
-package br.com.unisinos.es.t2.adapter.in.web;
+package br.com.unisinos.es.t2.adapter.in.web.user;
 
 import br.com.unisinos.es.t2.application.domain.model.User;
 import org.mapstruct.Mapper;

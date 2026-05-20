@@ -8,7 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 
 @Getter
-class Entity {
+public class Entity {
 
     @Id
     protected String id;
