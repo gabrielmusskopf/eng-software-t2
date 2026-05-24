@@ -16,6 +16,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @EqualsAndHashCode(callSuper = true)
 class UserEntity extends Entity {
     private String name;
-    private String password; // TODO: encrypt password
+    private String password;
     private String email;
 }

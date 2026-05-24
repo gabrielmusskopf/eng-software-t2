@@ -4,13 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class CreateTaskRequest {
+class CreateTaskRequest {
     @NotBlank
     private String title;
 
     @NotBlank
     private String description;
-
-    @NotBlank
-    private String userId; // TODO: Obter do token de autenticação
 }

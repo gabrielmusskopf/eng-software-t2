@@ -6,5 +6,5 @@ public interface CreateTaskService {
 
     Task createTask(CreateTaskCommand command);
 
-    record CreateTaskCommand(String title, String description, String userId) {}
+    record CreateTaskCommand(String title, String description) {}
 }

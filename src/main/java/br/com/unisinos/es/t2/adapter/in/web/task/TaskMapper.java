@@ -5,7 +5,7 @@ import br.com.unisinos.es.t2.application.port.in.task.CreateTaskService;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface TaskMapper {
+interface TaskMapper {
 
     CreateTaskService.CreateTaskCommand toCreateTaskCommand(CreateTaskRequest request);
 

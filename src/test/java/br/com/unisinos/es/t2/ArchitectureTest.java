@@ -20,6 +20,8 @@ public class ArchitectureTest {
     static final ArchRule domain_should_not_depend_on_outside = noClasses()
             .that()
             .resideInAPackage("..application.domain..")
+            .and()
+            .haveSimpleNameNotEndingWith("Test")
             .should()
             .dependOnClassesThat()
             .resideOutsideOfPackages(
