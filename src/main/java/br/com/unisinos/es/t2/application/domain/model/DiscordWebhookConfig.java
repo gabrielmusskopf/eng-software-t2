@@ -6,11 +6,11 @@ import lombok.Data;
 
 @Data
 @Builder
-public class User {
+public class DiscordWebhookConfig {
     private String id;
-    private String name;
-    private String password;
-    private String email;
+    private String userId;
+    private String webhookUrl;
+    private String username;
     private boolean deleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

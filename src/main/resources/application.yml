@@ -6,3 +6,10 @@ spring:
       auto-index-creation: true
   jackson:
     default-property-inclusion: non_null
+
+app:
+  discord:
+    enabled: true
+    default-username: Task Manager
+    connect-timeout-ms: 3000
+    read-timeout-ms: 5000
