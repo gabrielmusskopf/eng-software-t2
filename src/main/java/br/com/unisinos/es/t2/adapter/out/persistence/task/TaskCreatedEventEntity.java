@@ -1,6 +1,6 @@
 package br.com.unisinos.es.t2.adapter.out.persistence.task;
 
-import br.com.unisinos.es.t2.application.domain.model.EventType;
+import br.com.unisinos.es.t2.application.domain.model.TaskEventType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,5 +14,5 @@ import org.springframework.data.annotation.TypeAlias;
 @TypeAlias("TASK_CREATED")
 class TaskCreatedEventEntity extends TaskEventEntity {
 
-    private EventType eventType;
+    private TaskEventType eventType;
 }

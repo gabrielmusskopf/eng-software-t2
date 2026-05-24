@@ -1,8 +1,8 @@
 package br.com.unisinos.es.t2.adapter.out.persistence.task;
 
 import br.com.unisinos.es.t2.adapter.out.persistence.Entity;
-import br.com.unisinos.es.t2.application.domain.model.EventType;
 import br.com.unisinos.es.t2.application.domain.model.TaskCreatedEvent;
+import br.com.unisinos.es.t2.application.domain.model.TaskEventType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
@@ -32,5 +32,5 @@ public abstract class TaskEventEntity extends Entity {
     @NotBlank
     protected String userId;
 
-    protected abstract EventType getEventType();
+    protected abstract TaskEventType getEventType();
 }

@@ -4,12 +4,13 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public abstract class TaskEvent {
+public abstract class TaskEvent implements Event {
 
     protected String id;
     protected String taskId;
     protected String userId;
     protected LocalDateTime createdAt;
+    protected Task task;
 
-    public abstract EventType getEventType();
+    public abstract TaskEventType getEventType();
 }
