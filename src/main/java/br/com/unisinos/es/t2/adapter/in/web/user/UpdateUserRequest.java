@@ -9,8 +9,5 @@ public class UpdateUserRequest {
     private String name;
 
     @NotEmpty
-    private String password;
-
-    @NotEmpty
     private String email;
 }

@@ -3,6 +3,7 @@ package br.com.unisinos.es.t2.application.domain.service.user;
 import br.com.unisinos.es.t2.application.domain.exception.ClientException;
 import br.com.unisinos.es.t2.application.domain.model.User;
 import br.com.unisinos.es.t2.application.port.in.user.CreateUserService;
+import br.com.unisinos.es.t2.application.port.out.auth.EncryptPasswordPort;
 import br.com.unisinos.es.t2.application.port.out.user.ExistsUserByEmailPort;
 import br.com.unisinos.es.t2.application.port.out.user.SaveUserPort;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ class CreateUserImpl implements CreateUserService {
 
     private final UserMapper userMapper;
     private final ExistsUserByEmailPort existsUserByEmailPort;
+    private final EncryptPasswordPort encryptPasswordPort;
     private final SaveUserPort saveUserPort;
 
     @Override
@@ -24,8 +26,10 @@ class CreateUserImpl implements CreateUserService {
             log.debug("User tried to create an account with email {}, but it's already taken", command.email());
             throw new ClientException("Email already exists");
         }
+
         log.debug("Creating user with email {}", command.email());
-        User user = userMapper.toUser(command);
+        String password = encryptPasswordPort.encrypt(command.password());
+        User user = userMapper.toUser(command.name(), command.email(), password);
 
         return saveUserPort.save(user);
     }

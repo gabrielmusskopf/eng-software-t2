@@ -1,7 +1,9 @@
 package br.com.unisinos.es.t2.adapter.in.web;
 
 import br.com.unisinos.es.t2.application.domain.exception.ClientException;
+import br.com.unisinos.es.t2.application.domain.exception.NotAuthenticatedException;
 import br.com.unisinos.es.t2.application.domain.exception.NotFoundException;
+import br.com.unisinos.es.t2.application.domain.exception.ServerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +30,18 @@ class ControllerExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleNotFoundException(NotFoundException e) {
         log.warn("Resource not found: {}", e.getMessage());
         return ApiResponse.error(404, e.getMessage());
+    }
+
+    @ExceptionHandler(NotAuthenticatedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotAuthenticatedException(NotAuthenticatedException e) {
+        log.warn("Not authenticated: {}", e.getMessage());
+        return ApiResponse.error(401, e.getMessage());
+    }
+
+    @ExceptionHandler(ServerException.class)
+    public ResponseEntity<ApiResponse<Void>> handleServerException(ServerException e) {
+        log.error("Server error: {}", e.getMessage(), e);
+        return ApiResponse.error(500, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

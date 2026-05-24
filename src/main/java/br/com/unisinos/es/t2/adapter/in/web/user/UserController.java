@@ -6,6 +6,7 @@ import br.com.unisinos.es.t2.application.port.in.user.CreateUserService;
 import br.com.unisinos.es.t2.application.port.in.user.CreateUserService.CreateUserCommand;
 import br.com.unisinos.es.t2.application.port.in.user.DeleteUserService;
 import br.com.unisinos.es.t2.application.port.in.user.DeleteUserService.DeleteUserCommand;
+import br.com.unisinos.es.t2.application.port.in.user.GetAuthenticatedUserService;
 import br.com.unisinos.es.t2.application.port.in.user.GetUserService;
 import br.com.unisinos.es.t2.application.port.in.user.GetUserService.GetUserCommand;
 import br.com.unisinos.es.t2.application.port.in.user.UpdateUserService;
@@ -31,6 +32,7 @@ class UserController {
 
     private final UserMapper userMapper;
     private final CreateUserService createUserService;
+    private final GetAuthenticatedUserService getAuthenticatedUserService;
     private final GetUserService getUserService;
     private final UpdateUserService updateUserService;
     private final DeleteUserService deleteUserService;
@@ -44,6 +46,13 @@ class UserController {
         return ApiResponse.success(201, "User created successfully", userResponse);
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<GetUserResponse>> getMe() {
+        User authenticatedUser = getAuthenticatedUserService.get();
+        GetUserResponse userResponse = userMapper.toUserResponse(authenticatedUser);
+        return ApiResponse.success(200, "Authenticated user retrieved successfully", userResponse);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<GetUserResponse>> getUser(@PathVariable String id) {
         User user = getUserService.get(new GetUserCommand(id));
@@ -52,7 +61,8 @@ class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> updateUser(@PathVariable String id, @Valid UpdateUserRequest request) {
+    public ResponseEntity<ApiResponse<Void>> updateUser(
+            @PathVariable String id, @RequestBody @Valid UpdateUserRequest request) {
         updateUserService.update(new UpdateUserCommand(id, request.getName(), request.getEmail()));
         return ApiResponse.success(200, "User updated successfully");
     }
