@@ -1,4 +1,4 @@
-package br.com.unisinos.es.t2.adapter.out.persistence;
+package br.com.unisinos.es.t2.adapter.out.persistence.user;
 
 import jakarta.annotation.Nonnull;
 import java.util.Optional;

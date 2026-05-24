@@ -1,13 +1,13 @@
-package br.com.unisinos.es.t2.adapter.out.persistence;
+package br.com.unisinos.es.t2.adapter.out.persistence.user;
 
 import br.com.unisinos.es.t2.application.domain.model.User;
-import br.com.unisinos.es.t2.application.port.out.DeleteUserPort;
-import br.com.unisinos.es.t2.application.port.out.ExistsUserByEmailPort;
-import br.com.unisinos.es.t2.application.port.out.ExistsUserByIdPort;
-import br.com.unisinos.es.t2.application.port.out.GetUserByEmailPort;
-import br.com.unisinos.es.t2.application.port.out.GetUserByIdPort;
-import br.com.unisinos.es.t2.application.port.out.SaveUserPort;
-import br.com.unisinos.es.t2.application.port.out.UpdateUserPort;
+import br.com.unisinos.es.t2.application.port.out.user.DeleteUserPort;
+import br.com.unisinos.es.t2.application.port.out.user.ExistsUserByEmailPort;
+import br.com.unisinos.es.t2.application.port.out.user.ExistsUserByIdPort;
+import br.com.unisinos.es.t2.application.port.out.user.GetUserByEmailPort;
+import br.com.unisinos.es.t2.application.port.out.user.GetUserByIdPort;
+import br.com.unisinos.es.t2.application.port.out.user.SaveUserPort;
+import br.com.unisinos.es.t2.application.port.out.user.UpdateUserPort;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

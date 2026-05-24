@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-class ApiResponse<T> {
+public class ApiResponse<T> {
     private int statusCode;
     private String error;
     private String errorDetail;

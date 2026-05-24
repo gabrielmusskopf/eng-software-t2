@@ -1,10 +1,10 @@
-package br.com.unisinos.es.t2.application.domain.service;
+package br.com.unisinos.es.t2.application.domain.service.user;
 
 import br.com.unisinos.es.t2.application.domain.exception.ClientException;
 import br.com.unisinos.es.t2.application.domain.model.User;
-import br.com.unisinos.es.t2.application.port.in.CreateUserService;
-import br.com.unisinos.es.t2.application.port.out.ExistsUserByEmailPort;
-import br.com.unisinos.es.t2.application.port.out.SaveUserPort;
+import br.com.unisinos.es.t2.application.port.in.user.CreateUserService;
+import br.com.unisinos.es.t2.application.port.out.user.ExistsUserByEmailPort;
+import br.com.unisinos.es.t2.application.port.out.user.SaveUserPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

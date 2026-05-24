@@ -1,4 +1,4 @@
-package br.com.unisinos.es.t2.application.port.in;
+package br.com.unisinos.es.t2.application.port.in.user;
 
 public interface DeleteUserService {
 
