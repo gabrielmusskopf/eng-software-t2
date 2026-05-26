@@ -23,4 +23,5 @@ app:
       connect-timeout: 3s
       read-timeout: 5s
       events:
-        task-created: true
+        task-created:
+            enabled: true
