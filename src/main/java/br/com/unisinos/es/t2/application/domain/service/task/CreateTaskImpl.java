@@ -6,6 +6,7 @@ import br.com.unisinos.es.t2.application.domain.model.TaskCreatedEvent;
 import br.com.unisinos.es.t2.application.domain.model.User;
 import br.com.unisinos.es.t2.application.port.in.auth.GetAuthenticatedUserPort;
 import br.com.unisinos.es.t2.application.port.in.task.CreateTaskService;
+import br.com.unisinos.es.t2.application.port.out.event.PublishEventPort;
 import br.com.unisinos.es.t2.application.port.out.task.CreateTaskEventPort;
 import br.com.unisinos.es.t2.application.port.out.task.CreateTaskPort;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class CreateTaskImpl implements CreateTaskService {
     private final GetAuthenticatedUserPort getAuthenticatedUserPort;
     private final CreateTaskPort createTaskPort;
     private final CreateTaskEventPort createTaskEventPort;
+    private final PublishEventPort publishEventPort;
 
     @Override
     public Task createTask(CreateTaskCommand command) {
@@ -28,8 +30,11 @@ public class CreateTaskImpl implements CreateTaskService {
         Task task = createTaskPort.createTask(new Task(command.title(), command.description(), user.getId()));
         log.debug("Task {} created with id {}", task.getTitle(), task.getId());
 
-        createTaskEventPort.createTaskEvent(new TaskCreatedEvent(task));
+        TaskCreatedEvent taskCreatedEvent = new TaskCreatedEvent(task);
+        createTaskEventPort.createTaskEvent(taskCreatedEvent);
         log.debug("TaskCreatedEvent created for task id {}", task.getId());
+
+        publishEventPort.publish(taskCreatedEvent);
 
         return task;
     }

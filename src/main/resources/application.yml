@@ -1,3 +1,8 @@
+logging:
+  level:
+    root: INFO
+    br.com.unisinos.es.t2: DEBUG
+
 spring:
   application:
   name: t2
@@ -10,3 +15,12 @@ spring:
 app:
   jwt:
     private-key: gR43a55V6uTyiQT0tL50YaVW9Iy5dK+19fkhLmd5BjZbgKPXZ83ERMEO0DYjfOlcITkKABf1Pz1PpEK3b5bcKg==
+  notifications:
+    enabled: true
+    discord:
+      enabled: true
+      default-username: Task Manager
+      connect-timeout: 3s
+      read-timeout: 5s
+      events:
+        task-created: true

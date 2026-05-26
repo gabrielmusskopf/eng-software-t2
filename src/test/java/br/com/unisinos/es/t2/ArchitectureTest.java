@@ -34,6 +34,7 @@ public class ArchitectureTest {
                     "lombok..",
                     "org.slf4j..",
                     "org.springframework.stereotype..",
+					"org.springframework.boot.autoconfigure.condition..",
                     "org.mapstruct..")
             .because("O Domínio deve conter apenas regras de negócio puras.");
 
