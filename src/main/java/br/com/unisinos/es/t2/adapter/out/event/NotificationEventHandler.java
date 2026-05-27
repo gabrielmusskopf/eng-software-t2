@@ -1,7 +1,9 @@
 package br.com.unisinos.es.t2.adapter.out.event;
 
 import br.com.unisinos.es.t2.application.domain.model.TaskCreatedEvent;
+import br.com.unisinos.es.t2.application.domain.model.TaskDeletedEvent;
 import br.com.unisinos.es.t2.application.port.in.task.TaskCreatedNotificationService;
+import br.com.unisinos.es.t2.application.port.in.task.TaskDeletedNotificationService;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +19,18 @@ import org.springframework.stereotype.Component;
 class NotificationEventHandler {
 
     private final List<TaskCreatedNotificationService> taskCreatedNotificationServiceList;
+    private final List<TaskDeletedNotificationService> taskDeletedNotificationServiceList;
 
     @EventListener(TaskCreatedEvent.class)
     public void handleTaskCreatedEvent(TaskCreatedEvent event) {
         log.debug("Handling TaskCreatedEvent for task id {}", event);
         taskCreatedNotificationServiceList.forEach(notificationService -> notificationService.notify(event));
+    }
+
+    @EventListener(TaskDeletedEvent.class)
+    public void handleTaskDeletedEvent(TaskDeletedEvent event) {
+        log.debug("Handling TaskDeletedEvent for task id {}", event);
+        taskDeletedNotificationServiceList.forEach(notificationService -> notificationService.notify(event));
     }
 
     @PostConstruct

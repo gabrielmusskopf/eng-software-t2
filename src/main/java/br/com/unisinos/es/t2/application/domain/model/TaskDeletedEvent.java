@@ -7,12 +7,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public final class TaskCreatedEvent extends TaskEvent {
+public final class TaskDeletedEvent extends TaskEvent {
 
-    private final TaskEventType eventType = TaskEventType.CREATED;
+    private final TaskEventType eventType = TaskEventType.DELETED;
+    private User assignee;
 
-    public TaskCreatedEvent(Task task, User triggeredBy) {
+    public TaskDeletedEvent(Task task, User triggeredBy, User assignee) {
         this.task = task;
         this.triggeredBy = triggeredBy;
+        this.assignee = assignee;
     }
 }

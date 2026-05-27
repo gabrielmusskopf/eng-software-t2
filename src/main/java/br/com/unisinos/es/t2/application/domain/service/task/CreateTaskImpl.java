@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CreateTaskImpl implements CreateTaskService {
+class CreateTaskImpl implements CreateTaskService {
 
     private final GetAuthenticatedUserPort getAuthenticatedUserPort;
     private final CreateTaskPort createTaskPort;
@@ -30,7 +30,7 @@ public class CreateTaskImpl implements CreateTaskService {
         Task task = createTaskPort.createTask(new Task(command.title(), command.description(), user.getId()));
         log.debug("Task {} created with id {}", task.getTitle(), task.getId());
 
-        TaskCreatedEvent taskCreatedEvent = new TaskCreatedEvent(task);
+        TaskCreatedEvent taskCreatedEvent = new TaskCreatedEvent(task, user);
         createTaskEventPort.createTaskEvent(taskCreatedEvent);
         log.debug("TaskCreatedEvent created for task id {}", task.getId());
 

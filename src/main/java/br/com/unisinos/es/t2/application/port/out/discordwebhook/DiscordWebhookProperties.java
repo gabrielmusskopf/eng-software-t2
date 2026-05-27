@@ -16,6 +16,8 @@ public interface DiscordWebhookProperties {
 
     interface Events {
         Event getTaskCreated();
+
+        Event getTaskDeleted();
     }
 
     interface Event {
