@@ -1,10 +1,14 @@
 package br.com.unisinos.es.t2.application.domain.service.task.notification.discord;
 
+import br.com.unisinos.es.t2.application.domain.model.DiscordWebhookPayload;
+import br.com.unisinos.es.t2.application.domain.model.Task;
 import br.com.unisinos.es.t2.application.domain.model.TaskCreatedEvent;
-import br.com.unisinos.es.t2.application.port.in.task.TaskCreatedNotificationService;
-import jakarta.annotation.PostConstruct;
+import br.com.unisinos.es.t2.application.domain.model.User;
+import br.com.unisinos.es.t2.application.port.out.discordwebhook.DiscordWebhookProperties;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -12,7 +16,6 @@ import org.springframework.stereotype.Component;
 @Getter
 @Slf4j
 @Component
-@RequiredArgsConstructor
 @ConditionalOnProperty(
         name = {
             "app.notifications.enabled",
@@ -20,23 +23,36 @@ import org.springframework.stereotype.Component;
             "app.notifications.discord.events.task-created.enabled"
         },
         havingValue = "true")
-class TaskCreatedDiscordNotification implements TaskCreatedNotificationService {
+class TaskCreatedDiscordNotification extends AbstractDiscordNotification<TaskCreatedEvent> {
 
-    private final DiscordNotificationService discordNotificationService;
+    private final String title;
+    private final int color;
 
-    @Override
-    public void notify(TaskCreatedEvent event) {
-        log.debug(
-                "Notifying TaskCreatedEvent for task id {} via Discord",
-                event.getTask().getId());
+    public TaskCreatedDiscordNotification(
+            DiscordWebhookProperties properties, DiscordNotificationService discordNotificationService) {
+        super(properties, discordNotificationService);
 
-        discordNotificationService.notify(event);
+        DiscordWebhookProperties.Event taskCreated = properties.getEvents().getTaskCreated();
+        this.title = Objects.requireNonNullElse(taskCreated.getTitle(), "Tarefa criada");
+        this.color = Objects.requireNonNullElse(taskCreated.getColor(), 0x3498DB);
     }
 
-    @PostConstruct
-    private void postConstruct() {
-        log.debug(
-                "{} initialized and ready to send notifications for TaskCreatedEvent",
-                this.getClass().getSimpleName());
+    @Override
+    protected Set<String> getRecipients(TaskCreatedEvent event) {
+        User eventOwner = event.getTriggeredBy(); // Event owner is the task creator
+        return Set.of(eventOwner.getId());
+    }
+
+    @Override
+    protected List<DiscordWebhookPayload.Field> buildFields(TaskCreatedEvent event) {
+        Task task = event.getTask();
+        User eventOwner = event.getTriggeredBy();
+
+        return new DiscordWebhookPayload.EmbedFieldsBuilder()
+                .addField("Título", task.getTitle())
+                .addField("Descrição", task.getDescription())
+                .addField("Task ID", task.getId())
+                .addField("Criado por", eventOwner.getNameWithEmail())
+                .build();
     }
 }

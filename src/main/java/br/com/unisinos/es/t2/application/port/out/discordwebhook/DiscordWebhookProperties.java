@@ -18,9 +18,15 @@ public interface DiscordWebhookProperties {
         Event getTaskCreated();
 
         Event getTaskDeleted();
+
+        Event getTaskUpdated();
     }
 
     interface Event {
         boolean isEnabled();
+
+        String getTitle();
+
+        Integer getColor();
     }
 }

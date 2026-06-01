@@ -2,8 +2,8 @@ package br.com.unisinos.es.t2.adapter.out.event;
 
 import br.com.unisinos.es.t2.application.domain.model.TaskCreatedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskDeletedEvent;
-import br.com.unisinos.es.t2.application.port.in.task.TaskCreatedNotificationService;
-import br.com.unisinos.es.t2.application.port.in.task.TaskDeletedNotificationService;
+import br.com.unisinos.es.t2.application.domain.model.TaskUpdatedEvent;
+import br.com.unisinos.es.t2.application.port.in.task.TaskNotificationService;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,9 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "app.notifications.enabled", havingValue = "true")
 class NotificationEventHandler {
 
-    private final List<TaskCreatedNotificationService> taskCreatedNotificationServiceList;
-    private final List<TaskDeletedNotificationService> taskDeletedNotificationServiceList;
+    private final List<TaskNotificationService<TaskCreatedEvent>> taskCreatedNotificationServiceList;
+    private final List<TaskNotificationService<TaskDeletedEvent>> taskDeletedNotificationServiceList;
+    private final List<TaskNotificationService<TaskUpdatedEvent>> taskUpdatedNotificationServiceList;
 
     @EventListener(TaskCreatedEvent.class)
     public void handleTaskCreatedEvent(TaskCreatedEvent event) {
@@ -33,11 +34,21 @@ class NotificationEventHandler {
         taskDeletedNotificationServiceList.forEach(notificationService -> notificationService.notify(event));
     }
 
+    @EventListener(TaskUpdatedEvent.class)
+    public void handleTaskUpdatedEvent(TaskUpdatedEvent event) {
+        log.debug("Handling TaskUpdatedEvent for task id {}", event);
+        taskUpdatedNotificationServiceList.forEach(notificationService -> notificationService.notify(event));
+    }
+
     @PostConstruct
     void logCreation() {
         log.debug(
-                "NotificationEventHandler created, notifications are enabled. "
-                        + "Found {} TaskCreatedNotificationService beans",
-                taskCreatedNotificationServiceList.size());
+                "NotificationEventHandler created, notifications are enabled. Found "
+                        + "{} TaskCreatedNotificationService beans, "
+                        + "{} TaskDeletedNotificationService beans, "
+                        + "{} TaskUpdatedNotificationService beans.",
+                taskCreatedNotificationServiceList.size(),
+                taskDeletedNotificationServiceList.size(),
+                taskUpdatedNotificationServiceList.size());
     }
 }
