@@ -19,6 +19,7 @@ class SpringDiscordWebhookProperties implements DiscordWebhookProperties {
     @Data
     public static class Events implements DiscordWebhookProperties.Events {
         private Event taskCreated = new Event();
+        private Event taskDeleted = new Event();
     }
 
     @Data

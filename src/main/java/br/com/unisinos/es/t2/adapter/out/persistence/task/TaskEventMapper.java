@@ -1,17 +1,32 @@
 package br.com.unisinos.es.t2.adapter.out.persistence.task;
 
 import br.com.unisinos.es.t2.application.domain.model.TaskCreatedEvent;
+import br.com.unisinos.es.t2.application.domain.model.TaskDeletedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskEvent;
 import org.mapstruct.Mapper;
-import org.mapstruct.SubclassExhaustiveStrategy;
-import org.mapstruct.SubclassMapping;
 
-@Mapper(componentModel = "spring", subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
-public interface TaskEventMapper {
+@Mapper(componentModel = "spring")
+interface TaskEventMapper {
 
-    @SubclassMapping(source = TaskCreatedEvent.class, target = TaskCreatedEventEntity.class)
-    TaskEventEntity toEntity(TaskEvent taskEvent);
+    TaskCreatedEventEntity toEntity(TaskCreatedEvent taskCreatedEvent);
 
-    @SubclassMapping(source = TaskCreatedEventEntity.class, target = TaskCreatedEvent.class)
-    TaskEvent toDomain(TaskEventEntity taskEventEntity);
+    TaskDeletedEventEntity toEntity(TaskDeletedEvent taskDeletedEvent);
+
+    default TaskEventEntity toEntity(TaskEvent taskEvent) {
+        return switch (taskEvent) {
+            case TaskCreatedEvent createdEvent -> toEntity(createdEvent);
+            case TaskDeletedEvent deletedEvent -> toEntity(deletedEvent);
+        };
+    }
+
+    TaskCreatedEvent toDomain(TaskCreatedEventEntity taskCreatedEventEntity);
+
+    TaskDeletedEvent toDomain(TaskDeletedEventEntity taskDeletedEventEntity);
+
+    default TaskEvent toDomain(TaskEventEntity taskEventEntity) {
+        return switch (taskEventEntity) {
+            case TaskCreatedEventEntity createdEventEntity -> toDomain(createdEventEntity);
+            case TaskDeletedEventEntity deletedEventEntity -> toDomain(deletedEventEntity);
+        };
+    }
 }

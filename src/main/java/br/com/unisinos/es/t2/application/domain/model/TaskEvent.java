@@ -4,13 +4,15 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public abstract class TaskEvent implements Event {
+public abstract sealed class TaskEvent implements Event permits TaskCreatedEvent, TaskDeletedEvent {
 
     protected String id;
-    protected String taskId;
-    protected String userId;
-    protected LocalDateTime createdAt;
     protected Task task;
+    protected User triggeredBy;
+    protected LocalDateTime createdAt;
+    protected LocalDateTime updatedAt;
+    protected boolean deleted;
+    protected Long version;
 
     public abstract TaskEventType getEventType();
 }

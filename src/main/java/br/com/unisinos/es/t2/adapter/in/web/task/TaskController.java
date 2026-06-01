@@ -4,9 +4,13 @@ import br.com.unisinos.es.t2.adapter.in.web.ApiResponse;
 import br.com.unisinos.es.t2.application.domain.model.Task;
 import br.com.unisinos.es.t2.application.port.in.task.CreateTaskService;
 import br.com.unisinos.es.t2.application.port.in.task.CreateTaskService.CreateTaskCommand;
+import br.com.unisinos.es.t2.application.port.in.task.DeleteTaskService;
+import br.com.unisinos.es.t2.application.port.in.task.DeleteTaskService.DeleteTaskCommand;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +23,7 @@ class TaskController {
 
     private final TaskMapper taskMapper;
     private final CreateTaskService createTaskService;
+    private final DeleteTaskService deleteTaskService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<CreateTaskResponse>> createTask(@Valid @RequestBody CreateTaskRequest request) {
@@ -26,5 +31,11 @@ class TaskController {
         Task task = createTaskService.createTask(command);
         CreateTaskResponse createTaskResponse = taskMapper.toCreateTaskResponse(task);
         return ApiResponse.success(201, "Task created successfully", createTaskResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteTask(@PathVariable String id) {
+        deleteTaskService.deleteTask(new DeleteTaskCommand(id));
+        return ApiResponse.success(200, "Task deleted successfully");
     }
 }

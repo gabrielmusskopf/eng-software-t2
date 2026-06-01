@@ -14,4 +14,8 @@ public class User {
     private boolean deleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public String getNameWithEmail() {
+        return String.format("%s <%s>", name, email);
+    }
 }

@@ -25,3 +25,5 @@ app:
       events:
         task-created:
             enabled: true
+        task-deleted:
+          enabled: true
