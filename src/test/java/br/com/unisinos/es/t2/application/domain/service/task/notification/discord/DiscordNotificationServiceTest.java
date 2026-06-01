@@ -12,7 +12,6 @@ import br.com.unisinos.es.t2.EasyRandomExtension;
 import br.com.unisinos.es.t2.application.domain.model.DiscordNotification;
 import br.com.unisinos.es.t2.application.domain.model.DiscordWebhookConfig;
 import br.com.unisinos.es.t2.application.domain.model.DiscordWebhookPayload;
-import br.com.unisinos.es.t2.application.domain.model.TaskCreatedEvent;
 import br.com.unisinos.es.t2.application.port.out.discordwebhook.DiscordWebhookClient;
 import br.com.unisinos.es.t2.application.port.out.discordwebhook.GetDiscordWebhookByUserIdPort;
 import java.util.Optional;
@@ -36,18 +35,13 @@ class DiscordNotificationServiceTest {
     @Mock
     private DiscordWebhookClient discordWebhookClient;
 
-    @Mock
-    private DiscordNotificationFactory discordNotificationFactory;
-
     @Test
     void shouldNotSendDiscordNotificationWhenRecipientsHaveNoWebhookConfigured(EasyRandom easyRandom) {
-        TaskCreatedEvent event = easyRandom.nextObject(TaskCreatedEvent.class);
         DiscordNotification notification = easyRandom.nextObject(DiscordNotification.class);
 
-        when(discordNotificationFactory.newDiscordNotification(event)).thenReturn(notification);
         when(getDiscordWebhookByUserIdPort.getByUserId(anyString())).thenReturn(Optional.empty());
 
-        notificationService.notify(event);
+        notificationService.notify(notification);
 
         for (String userId : notification.getRecipients()) {
             verify(getDiscordWebhookByUserIdPort).getByUserId(userId);
@@ -57,14 +51,12 @@ class DiscordNotificationServiceTest {
 
     @Test
     void shouldSendDiscordNotificationToAllRecipientsWithWebhookConfigured(EasyRandom easyRandom) {
-        TaskCreatedEvent event = easyRandom.nextObject(TaskCreatedEvent.class);
         DiscordNotification notification = easyRandom.nextObject(DiscordNotification.class);
 
-        when(discordNotificationFactory.newDiscordNotification(event)).thenReturn(notification);
         when(getDiscordWebhookByUserIdPort.getByUserId(anyString()))
                 .thenReturn(Optional.of(easyRandom.nextObject(DiscordWebhookConfig.class)));
 
-        notificationService.notify(event);
+        notificationService.notify(notification);
 
         int recipients = notification.getRecipients().size();
         verify(getDiscordWebhookByUserIdPort, times(recipients)).getByUserId(anyString());
@@ -73,17 +65,15 @@ class DiscordNotificationServiceTest {
 
     @Test
     void shouldHandleDiscordNotificationFailureGracefully(EasyRandom easyRandom) {
-        TaskCreatedEvent event = easyRandom.nextObject(TaskCreatedEvent.class);
         DiscordNotification notification = easyRandom.nextObject(DiscordNotification.class);
 
-        when(discordNotificationFactory.newDiscordNotification(event)).thenReturn(notification);
         when(getDiscordWebhookByUserIdPort.getByUserId(anyString()))
                 .thenReturn(Optional.of(easyRandom.nextObject(DiscordWebhookConfig.class)));
         doThrow(new RuntimeException("Simulated failure"))
                 .when(discordWebhookClient)
                 .send(anyString(), any(DiscordWebhookPayload.class));
 
-        notificationService.notify(event);
+        notificationService.notify(notification);
 
         int recipients = notification.getRecipients().size();
         verify(getDiscordWebhookByUserIdPort, times(recipients)).getByUserId(anyString());

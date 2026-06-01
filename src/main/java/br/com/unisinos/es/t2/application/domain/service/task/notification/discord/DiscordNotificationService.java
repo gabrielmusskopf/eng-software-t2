@@ -2,7 +2,7 @@ package br.com.unisinos.es.t2.application.domain.service.task.notification.disco
 
 import br.com.unisinos.es.t2.application.domain.model.DiscordNotification;
 import br.com.unisinos.es.t2.application.domain.model.DiscordWebhookConfig;
-import br.com.unisinos.es.t2.application.domain.model.TaskEvent;
+import br.com.unisinos.es.t2.application.domain.model.Task;
 import br.com.unisinos.es.t2.application.port.out.discordwebhook.DiscordWebhookClient;
 import br.com.unisinos.es.t2.application.port.out.discordwebhook.GetDiscordWebhookByUserIdPort;
 import jakarta.annotation.PostConstruct;
@@ -22,14 +22,10 @@ class DiscordNotificationService {
 
     private final GetDiscordWebhookByUserIdPort getDiscordWebhookByUserIdPort;
     private final DiscordWebhookClient discordWebhookClient;
-    private final DiscordNotificationFactory discordNotificationFactory;
 
-    public void notify(TaskEvent event) {
-        log.debug(
-                "Notifying TaskCreatedEvent for task id {} via Discord",
-                event.getTask().getId());
-
-        DiscordNotification discordNotification = discordNotificationFactory.newDiscordNotification(event);
+    public void notify(DiscordNotification discordNotification) {
+        Task task = discordNotification.getTask();
+        log.debug("Notifying TaskCreatedEvent for task id {} via Discord", task.getId());
 
         for (String userId : discordNotification.getRecipients()) {
             Optional<DiscordWebhookConfig> webhookConfigOptional = getDiscordWebhookByUserIdPort.getByUserId(userId);
@@ -37,22 +33,19 @@ class DiscordNotificationService {
                 log.debug(
                         "No Discord webhook configured for user {}. Skipping notification for task id {}",
                         userId,
-                        event.getTask().getId());
+                        task.getId());
                 continue;
             }
 
             DiscordWebhookConfig webhookConfig = webhookConfigOptional.get();
             try {
                 discordWebhookClient.send(webhookConfig.getWebhookUrl(), discordNotification.getPayload());
-                log.debug(
-                        "Discord notification sent for task id {} to user {}",
-                        event.getTask().getId(),
-                        userId);
+                log.debug("Discord notification sent for task id {} to user {}", task.getId(), userId);
             } catch (Exception e) {
                 // TODO: Consider retrying or marking the webhook as invalid after repeated failures
                 log.warn(
                         "Failed to send Discord notification for task id {} to user {}: {}",
-                        event.getTask().getId(),
+                        task.getId(),
                         userId,
                         e.getMessage());
             }

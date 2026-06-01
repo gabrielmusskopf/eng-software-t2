@@ -27,3 +27,5 @@ app:
             enabled: true
         task-deleted:
           enabled: true
+        task-updated:
+          enabled: true

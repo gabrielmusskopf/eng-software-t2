@@ -18,6 +18,7 @@ public class Task {
     private boolean deleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long version;
 
     public Task(String title, String description, String userId) {
         this.title = title;

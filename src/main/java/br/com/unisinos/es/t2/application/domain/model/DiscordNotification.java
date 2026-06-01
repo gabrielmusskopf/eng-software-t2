@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 public class DiscordNotification {
 
+    private Task task;
     private Set<String> recipients;
     private DiscordWebhookPayload payload;
 }
