@@ -1,6 +1,8 @@
 package br.com.unisinos.es.t2.adapter.out.persistence.task;
 
 import br.com.unisinos.es.t2.application.domain.model.Task;
+import br.com.unisinos.es.t2.application.domain.model.TaskStatus;
+import br.com.unisinos.es.t2.application.port.out.task.CountTaskByStatusPort;
 import br.com.unisinos.es.t2.application.port.out.task.CreateTaskPort;
 import br.com.unisinos.es.t2.application.port.out.task.DeleteTaskByIdPort;
 import br.com.unisinos.es.t2.application.port.out.task.GetTaskByIdPort;
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class TaskPersistenceAdapter
-        implements CreateTaskPort, GetTaskByIdPort, DeleteTaskByIdPort, GetTasksByUserIdPort {
+        implements CreateTaskPort, GetTaskByIdPort, DeleteTaskByIdPort, GetTasksByUserIdPort, CountTaskByStatusPort {
 
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
@@ -42,5 +44,10 @@ public class TaskPersistenceAdapter
         return taskRepository.findByUserIdAndDeletedFalse(userId).stream()
                 .map(taskMapper::toTask)
                 .toList();
+    }
+
+    @Override
+    public long countByStatus(TaskStatus status) {
+        return taskRepository.countByStatusAndDeletedFalse(status);
     }
 }

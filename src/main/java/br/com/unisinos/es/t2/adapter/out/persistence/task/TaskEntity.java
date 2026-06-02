@@ -2,6 +2,7 @@ package br.com.unisinos.es.t2.adapter.out.persistence.task;
 
 import br.com.unisinos.es.t2.adapter.out.persistence.Entity;
 import br.com.unisinos.es.t2.application.domain.model.TaskStatus;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,4 +19,5 @@ public class TaskEntity extends Entity {
     private String description;
     private String userId;
     private TaskStatus status;
+    private LocalDateTime statusUpdatedAt;
 }

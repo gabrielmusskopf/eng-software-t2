@@ -60,7 +60,8 @@ class TaskUpdatedDiscordNotificationTest {
 
         assertEquals(2, notification.getRecipients().size());
         assertTrue(notification.getRecipients().contains(taskEvent.getAssignee().getId()));
-        assertTrue(notification.getRecipients().contains(taskEvent.getTriggeredBy().getId()));
+        assertTrue(
+                notification.getRecipients().contains(taskEvent.getTriggeredBy().getId()));
 
         assertEquals("Task Manager Bot", notification.getPayload().getUsername());
         assertEquals(1, notification.getPayload().getEmbeds().size());
@@ -107,7 +108,8 @@ class TaskUpdatedDiscordNotificationTest {
 
         assertEquals(2, notification.getRecipients().size());
         assertTrue(notification.getRecipients().contains(taskEvent.getAssignee().getId()));
-        assertTrue(notification.getRecipients().contains(taskEvent.getTriggeredBy().getId()));
+        assertTrue(
+                notification.getRecipients().contains(taskEvent.getTriggeredBy().getId()));
 
         assertEquals("Task Manager Bot", notification.getPayload().getUsername());
         assertEquals(1, notification.getPayload().getEmbeds().size());

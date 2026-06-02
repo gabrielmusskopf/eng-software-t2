@@ -45,3 +45,39 @@ Para garantir a qualidade e a consistência da base de código, seguimos regras 
    ```bash
    ./gradlew test
    ```
+
+## Configurações
+
+| Propriedade           | Descrição                                   | Valor padrão |
+|-----------------------|---------------------------------------------|--------------|
+| `app.metrics.enabled` | Habilita ou desabilita a coleta de métricas | `true`       |
+
+## Funcionalidades
+
+### Métricas
+
+O sistema inclui um dashboard de métricas que exibe informações relevantes sobre as tarefas, como o número total de tarefas,
+tarefas concluídas, tarefas pendentes e outras estatísticas úteis para o gerenciamento eficiente das atividades, exportadas no formato do Prometheus.
+
+Métricas são coletadas por eventos emitidos pela aplicação. Ou seja, coletar métricas e expô-las no formato do Prometheus
+não quebra o isolamento da aplicação, já que a coleta é feita em adaptadores de saída. A classe responsável é `MicrometerMetricEventHandler`.
+
+É possível ativar/desativar a coleta de métricas através da propriedade `app.metrics.enabled` no arquivo `application.yml`. Por padrão, a coleta de métricas está habilitada.
+Desabilitar a coleta de métricas faz com que o bean da classe nem seja instanciado, portanto, os eventos não serão escutados por ela. A aplicação não sofre nenhuma alteração.
+
+| Evento                        | Tipo    | Métrica                            | Tags                                                                                                                                                                                                                                                                                                    | Descrição                                                    |
+|-------------------------------|---------|------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| `TaskCreatedEvent`            | counter | `api_task_operations_total`        | `operation=create`, `description=Criado`                                                                                                                                                                                                                                                                | Incrementa o contador de tarefas criadas.                    |
+| `TaskDeletedEvent`            | counter | `api_task_operations_total`        | `operation=delete`, `description=Excluído`                                                                                                                                                                                                                                                              | Incrementa o contador de tarefas excluídas.                  |
+| `TaskReassignedEvent`         | counter | `api_task_operations_total`        | `operation=reassign`, `description=Re-atribuído`                                                                                                                                                                                                                                                        | Incrementa o contador de tarefas reatribuídas.               |
+| `TaskTitleChangedEvent`       | counter | `api_task_operations_total`        | `operation=update_title`, `description=Título atualizado`                                                                                                                                                                                                                                               | Incrementa o contador de tarefas com título alterado.        |
+| `TaskDescriptionChangedEvent` | counter | `api_task_operations_total`        | `operation=update_description`, `description=Descrição atualizada`                                                                                                                                                                                                                                      | Incrementa o contador de tarefas com descrição alterada.     |
+| `TaskStatusChangedEvent`      | counter | `api_task_operations_total`        | Se o status é BACKLOG, `operation=deferred` e `description=Backlog`<br/>Se o status é IN_PROCESS, `operation=stated` e `description=Em progresso`<br/>Se status é COMPLETED, `operation=comlpeted` e `description=Concluída`<br/>Se status é CANCELLED, `operation=cancelled` e `description=Cancelada` | Incrementa o contador de tarefas com status alterado.        |
+| `TaskStatusChangedEvent`      | timer   | `api_task_status_duration_seconds` | `status=backlog/in_process/completed/cancelled` e `description=Backlog/Em progresso/Concluída/Cancelada`                                                                                                                                                                                                | Registra a duração que as tarefas permanecem em cada status. |
+| -                             | gauge   | `api_tasks_by_status`              | `status=backlog/in_process/completed/cancelled` e `description=Backlog/Em progresso/Concluída/Cancelada`                                                                                                                                                                                                | Mede a quantidade de tarefas em cada status.                 |
+
+Ao subir a aplicação, devido ao `spring-docker-compose` e o arquivo `docker-compose`, o Prometheus e Grafana são iniciados automaticamente nas portas `9090` e `3000`, respectivamente. Ao acessar o Grafana, use o usuário `admin` e senha `admin` para fazer login.
+No diretório `dashboards` estão os arquivos de dashboard usados, basta baixar o arquivo e importá-lo no Grafana para visualizar as métricas coletadas. Exemplo:
+
+![Dashboard de métricas](./docs/metricas.png)
+

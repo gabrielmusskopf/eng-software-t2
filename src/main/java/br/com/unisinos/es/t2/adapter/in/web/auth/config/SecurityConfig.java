@@ -31,6 +31,8 @@ class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/auth/login")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/actuator/*")
+                        .permitAll()
                         .anyRequest()
                         .authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

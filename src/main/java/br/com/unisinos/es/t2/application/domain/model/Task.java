@@ -16,6 +16,7 @@ public class Task {
     private String userId;
     private String description;
     private TaskStatus status;
+    private LocalDateTime statusUpdatedAt;
     private boolean deleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -26,5 +27,11 @@ public class Task {
         this.description = description;
         this.userId = userId;
         this.status = TaskStatus.BACKLOG;
+        this.statusUpdatedAt = LocalDateTime.now();
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+        this.statusUpdatedAt = LocalDateTime.now();
     }
 }
