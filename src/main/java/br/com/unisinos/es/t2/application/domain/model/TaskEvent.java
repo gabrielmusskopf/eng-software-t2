@@ -7,9 +7,10 @@ import lombok.Data;
 public abstract sealed class TaskEvent implements Event
         permits TaskCreatedEvent,
                 TaskDeletedEvent,
-                TaskReassignedEvent,
-                TaskTitleChangedEvent,
                 TaskDescriptionChangedEvent,
+                TaskReassignedEvent,
+                TaskStatusChangedEvent,
+                TaskTitleChangedEvent,
                 TaskUpdatedEvent {
 
     protected String id;

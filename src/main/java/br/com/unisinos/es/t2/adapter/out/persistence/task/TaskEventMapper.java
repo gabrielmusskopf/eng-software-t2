@@ -5,6 +5,7 @@ import br.com.unisinos.es.t2.application.domain.model.TaskDeletedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskDescriptionChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskReassignedEvent;
+import br.com.unisinos.es.t2.application.domain.model.TaskStatusChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskTitleChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskUpdatedEvent;
 import org.mapstruct.Mapper;
@@ -24,6 +25,8 @@ interface TaskEventMapper {
 
     TaskDescriptionChangedEventEntity toEntity(TaskDescriptionChangedEvent taskDescriptionChangedEvent);
 
+    TaskStatusChangedEventEntity toEntity(TaskStatusChangedEvent taskStatusChangedEvent);
+
     default TaskEventEntity toEntity(TaskEvent taskEvent) {
         return switch (taskEvent) {
             case TaskCreatedEvent createdEvent -> toEntity(createdEvent);
@@ -32,6 +35,7 @@ interface TaskEventMapper {
             case TaskUpdatedEvent updatedEvent -> toEntity(updatedEvent);
             case TaskTitleChangedEvent titleChangedEvent -> toEntity(titleChangedEvent);
             case TaskDescriptionChangedEvent descriptionChangedEvent -> toEntity(descriptionChangedEvent);
+            case TaskStatusChangedEvent taskStatusChangedEvent -> toEntity(taskStatusChangedEvent);
         };
     }
 
@@ -47,6 +51,8 @@ interface TaskEventMapper {
 
     TaskDescriptionChangedEvent toDomain(TaskDescriptionChangedEventEntity taskDescriptionChangedEventEntity);
 
+    TaskStatusChangedEvent toDomain(TaskStatusChangedEventEntity taskStatusChangedEventEntity);
+
     default TaskEvent toDomain(TaskEventEntity taskEventEntity) {
         return switch (taskEventEntity) {
             case TaskCreatedEventEntity createdEventEntity -> toDomain(createdEventEntity);
@@ -56,6 +62,7 @@ interface TaskEventMapper {
             case TaskTitleChangedEventEntity titleChangedEventEntity -> toDomain(titleChangedEventEntity);
             case TaskDescriptionChangedEventEntity descriptionChangedEventEntity ->
                 toDomain(descriptionChangedEventEntity);
+            case TaskStatusChangedEventEntity taskStatusChangedEventEntity -> toDomain(taskStatusChangedEventEntity);
         };
     }
 }
