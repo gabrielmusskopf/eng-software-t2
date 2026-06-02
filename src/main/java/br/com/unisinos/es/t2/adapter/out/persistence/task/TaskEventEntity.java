@@ -28,7 +28,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
     @JsonSubTypes.Type(value = TaskReassignedEventEntity.class, name = "TASK_REASSIGNED"),
     @JsonSubTypes.Type(value = TaskUpdatedEventEntity.class, name = "TASK_UPDATED"),
     @JsonSubTypes.Type(value = TaskTitleChangedEventEntity.class, name = "TASK_TITLE_CHANGED"),
-    @JsonSubTypes.Type(value = TaskDescriptionChangedEventEntity.class, name = "TASK_DESCRIPTION_CHANGED")
+    @JsonSubTypes.Type(value = TaskDescriptionChangedEventEntity.class, name = "TASK_DESCRIPTION_CHANGED"),
+    @JsonSubTypes.Type(value = TaskStatusChangedEventEntity.class, name = "TASK_STATUS_CHANGED")
 })
 @Document(collection = "task_events")
 public abstract sealed class TaskEventEntity extends Entity
@@ -36,6 +37,7 @@ public abstract sealed class TaskEventEntity extends Entity
                 TaskDeletedEventEntity,
                 TaskDescriptionChangedEventEntity,
                 TaskReassignedEventEntity,
+                TaskStatusChangedEventEntity,
                 TaskTitleChangedEventEntity,
                 TaskUpdatedEventEntity {
     @NotBlank

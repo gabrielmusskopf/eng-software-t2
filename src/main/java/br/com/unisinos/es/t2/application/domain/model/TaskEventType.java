@@ -5,6 +5,7 @@ public enum TaskEventType {
     DELETED,
     UPDATED,
     REASSIGNED,
+    STATUS_CHANGED,
     TITLE_CHANGED,
     DESCRIPTION_CHANGED,
 }

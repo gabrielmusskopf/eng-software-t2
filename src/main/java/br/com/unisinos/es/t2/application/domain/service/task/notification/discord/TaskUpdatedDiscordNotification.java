@@ -3,6 +3,7 @@ package br.com.unisinos.es.t2.application.domain.service.task.notification.disco
 import br.com.unisinos.es.t2.application.domain.model.DiscordWebhookPayload;
 import br.com.unisinos.es.t2.application.domain.model.Task;
 import br.com.unisinos.es.t2.application.domain.model.TaskReassignedEvent;
+import br.com.unisinos.es.t2.application.domain.model.TaskStatusChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskTitleChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskUpdatedEvent;
 import br.com.unisinos.es.t2.application.domain.model.User;
@@ -58,7 +59,7 @@ class TaskUpdatedDiscordNotification extends AbstractDiscordNotification<TaskUpd
         this.addTitleFields(event, fieldsBuilder);
         fieldsBuilder.addField("Descrição", task.getDescription());
         fieldsBuilder.addField("Task ID", task.getId());
-
+        this.addStatusFields(event, fieldsBuilder);
         this.addAssigneeFields(event, fieldsBuilder);
         fieldsBuilder.addField("Atualizada por", actionUser.getNameWithEmail());
 
@@ -87,6 +88,19 @@ class TaskUpdatedDiscordNotification extends AbstractDiscordNotification<TaskUpd
             }
         } else {
             fieldsBuilder.addField("Vinculado a", event.getAssignee().getNameWithEmail());
+        }
+    }
+
+    private void addStatusFields(TaskUpdatedEvent event, DiscordWebhookPayload.EmbedFieldsBuilder fieldsBuilder) {
+        if (event.hasEventType(TaskStatusChangedEvent.class)) {
+            for (TaskStatusChangedEvent statusChangedEvent : event.getEventsByType(TaskStatusChangedEvent.class)) {
+                fieldsBuilder.addField(
+                        "Status",
+                        "De `" + statusChangedEvent.getStatusBefore().getDisplayName() + "` para `"
+                                + statusChangedEvent.getTask().getStatus().getDisplayName() + "`");
+            }
+        } else {
+            fieldsBuilder.addField("Status", event.getTask().getStatus().getDisplayName());
         }
     }
 }

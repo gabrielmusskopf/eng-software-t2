@@ -7,6 +7,7 @@ import br.com.unisinos.es.t2.application.domain.model.Task;
 import br.com.unisinos.es.t2.application.domain.model.TaskDescriptionChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskReassignedEvent;
+import br.com.unisinos.es.t2.application.domain.model.TaskStatusChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskTitleChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskUpdatedEvent;
 import br.com.unisinos.es.t2.application.domain.model.User;
@@ -76,6 +77,16 @@ class UpdateTaskImpl implements UpdateTaskService {
                     command.description());
             events.add(new TaskDescriptionChangedEvent(task, authUser, newAssignee, task.getDescription()));
             task.setDescription(command.description());
+            taskChanged = true;
+        }
+        if (!task.getStatus().equals(command.status())) {
+            log.debug(
+                    "Updating status of task id {} from '{}' to '{}'",
+                    task.getId(),
+                    task.getStatus(),
+                    command.status());
+            events.add(new TaskStatusChangedEvent(task, authUser, task.getStatus()));
+            task.setStatus(command.status());
             taskChanged = true;
         }
 
