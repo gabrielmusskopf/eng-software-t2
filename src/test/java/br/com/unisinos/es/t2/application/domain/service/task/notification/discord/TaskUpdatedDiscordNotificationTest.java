@@ -14,7 +14,6 @@ import br.com.unisinos.es.t2.application.domain.model.TaskTitleChangedEvent;
 import br.com.unisinos.es.t2.application.domain.model.TaskUpdatedEvent;
 import br.com.unisinos.es.t2.application.domain.model.User;
 import br.com.unisinos.es.t2.application.port.out.discordwebhook.DiscordWebhookProperties;
-import java.util.Iterator;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -60,9 +59,8 @@ class TaskUpdatedDiscordNotificationTest {
         DiscordNotification notification = notificationCaptor.getValue();
 
         assertEquals(2, notification.getRecipients().size());
-        Iterator<String> iterator = notification.getRecipients().iterator();
-        assertEquals(taskEvent.getAssignee().getId(), iterator.next());
-        assertEquals(taskEvent.getTriggeredBy().getId(), iterator.next());
+        assertTrue(notification.getRecipients().contains(taskEvent.getAssignee().getId()));
+        assertTrue(notification.getRecipients().contains(taskEvent.getTriggeredBy().getId()));
 
         assertEquals("Task Manager Bot", notification.getPayload().getUsername());
         assertEquals(1, notification.getPayload().getEmbeds().size());
@@ -109,8 +107,7 @@ class TaskUpdatedDiscordNotificationTest {
 
         assertEquals(2, notification.getRecipients().size());
         assertTrue(notification.getRecipients().contains(taskEvent.getAssignee().getId()));
-        assertTrue(
-                notification.getRecipients().contains(taskEvent.getTriggeredBy().getId()));
+        assertTrue(notification.getRecipients().contains(taskEvent.getTriggeredBy().getId()));
 
         assertEquals("Task Manager Bot", notification.getPayload().getUsername());
         assertEquals(1, notification.getPayload().getEmbeds().size());

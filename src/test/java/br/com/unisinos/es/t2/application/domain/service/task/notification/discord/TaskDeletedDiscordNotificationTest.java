@@ -1,6 +1,7 @@
 package br.com.unisinos.es.t2.application.domain.service.task.notification.discord;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -12,7 +13,6 @@ import br.com.unisinos.es.t2.application.domain.model.DiscordWebhookPayload;
 import br.com.unisinos.es.t2.application.domain.model.TaskDeletedEvent;
 import br.com.unisinos.es.t2.application.domain.model.User;
 import br.com.unisinos.es.t2.application.port.out.discordwebhook.DiscordWebhookProperties;
-import java.util.Iterator;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.Test;
@@ -57,9 +57,8 @@ class TaskDeletedDiscordNotificationTest {
         DiscordNotification notification = notificationCaptor.getValue();
 
         assertEquals(2, notification.getRecipients().size());
-        Iterator<String> iterator = notification.getRecipients().iterator();
-        assertEquals(assignee.getId(), iterator.next());
-        assertEquals(triggeredBy.getId(), iterator.next());
+        assertTrue(notification.getRecipients().contains(assignee.getId()));
+        assertTrue(notification.getRecipients().contains(triggeredBy.getId()));
 
         assertEquals("Task Manager Bot", notification.getPayload().getUsername());
         assertEquals(1, notification.getPayload().getEmbeds().size());
