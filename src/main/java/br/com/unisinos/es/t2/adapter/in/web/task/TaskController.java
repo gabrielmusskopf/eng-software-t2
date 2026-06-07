@@ -6,17 +6,22 @@ import br.com.unisinos.es.t2.application.port.in.task.CreateTaskService;
 import br.com.unisinos.es.t2.application.port.in.task.CreateTaskService.CreateTaskCommand;
 import br.com.unisinos.es.t2.application.port.in.task.DeleteTaskService;
 import br.com.unisinos.es.t2.application.port.in.task.DeleteTaskService.DeleteTaskCommand;
+import br.com.unisinos.es.t2.application.port.in.task.GetTasksByUserService;
+import br.com.unisinos.es.t2.application.port.in.task.GetTasksByUserService.GetTasksByUserCommand;
 import br.com.unisinos.es.t2.application.port.in.task.UpdateTaskService;
 import br.com.unisinos.es.t2.application.port.in.task.UpdateTaskService.UpdateTaskCommand;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -28,6 +33,7 @@ class TaskController {
     private final CreateTaskService createTaskService;
     private final DeleteTaskService deleteTaskService;
     private final UpdateTaskService updateTaskService;
+    private final GetTasksByUserService getTasksByUserService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<CreateTaskResponse>> createTask(@Valid @RequestBody CreateTaskRequest request) {
@@ -50,5 +56,12 @@ class TaskController {
         Task updatedTask = updateTaskService.updateTask(command);
         UpdateTaskResponse response = taskMapper.toUpdateTaskResponse(updatedTask);
         return ApiResponse.success(200, "Task updated successfully", response);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<GetTaskResponse>>> getTasksByAssignee(@RequestParam String assignedTo) {
+        List<Task> tasks = getTasksByUserService.getByAssignedUser(new GetTasksByUserCommand(assignedTo));
+        List<GetTaskResponse> response = taskMapper.toGetTaskResponseList(tasks);
+        return ApiResponse.success(200, "Tasks retrieved successfully", response);
     }
 }
