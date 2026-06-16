@@ -5,12 +5,30 @@ logging:
 
 spring:
   application:
-  name: t2
+    name: t2
+  docker:
+    compose:
+      enabled: true
+      lifecycle-management: start-only
   data:
     mongodb:
       auto-index-creation: true
   jackson:
     default-property-inclusion: non_null
+
+management:
+  server:
+    port: 8090
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 app:
   jwt:
@@ -29,3 +47,5 @@ app:
           enabled: true
         task-updated:
           enabled: true
+  metrics:
+    enabled: true

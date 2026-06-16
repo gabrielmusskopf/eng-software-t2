@@ -85,7 +85,7 @@ class UpdateTaskImpl implements UpdateTaskService {
                     task.getId(),
                     task.getStatus(),
                     command.status());
-            events.add(new TaskStatusChangedEvent(task, authUser, task.getStatus()));
+            events.add(new TaskStatusChangedEvent(task, authUser));
             task.setStatus(command.status());
             taskChanged = true;
         }
@@ -100,6 +100,7 @@ class UpdateTaskImpl implements UpdateTaskService {
         TaskUpdatedEvent taskUpdatedEvent = new TaskUpdatedEvent(newTask, authUser, newAssignee, events);
         createTaskEventPort.createTaskEvent(taskUpdatedEvent);
         publishEventPort.publish(taskUpdatedEvent);
+        events.forEach(publishEventPort::publish);
 
         return newTask;
     }
