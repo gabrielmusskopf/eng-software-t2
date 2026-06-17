@@ -135,7 +135,8 @@ class MicrometerMetricEventHandler {
     void registerGaugesTasksByStatus() {
         for (TaskStatus status : TaskStatus.values()) {
             log.debug("Registering Gauge for task status: {}", status);
-            // TODO: Refactor to avoid querying the database on every scrape. Consider using a cache or a scheduled task to update the counts periodically.
+            // TODO: Refactor to avoid querying the database on every scrape. Consider using a cache or a scheduled task
+            // to update the counts periodically.
             Gauge.builder("api_tasks_by_status", status, countTaskByStatusPort::countByStatus)
                     .description("Número atual de tarefas por status")
                     .tag("status", status.name().toLowerCase())
