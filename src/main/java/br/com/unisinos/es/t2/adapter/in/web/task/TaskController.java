@@ -10,6 +10,7 @@ import br.com.unisinos.es.t2.application.port.in.task.GetTasksByUserService;
 import br.com.unisinos.es.t2.application.port.in.task.GetTasksByUserService.GetTasksByUserCommand;
 import br.com.unisinos.es.t2.application.port.in.task.UpdateTaskService;
 import br.com.unisinos.es.t2.application.port.in.task.UpdateTaskService.UpdateTaskCommand;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Tasks", description = "Gerenciamento de tarefas")
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor

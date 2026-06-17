@@ -8,6 +8,7 @@ import br.com.unisinos.es.t2.application.port.in.taskcomment.DeleteTaskCommentSe
 import br.com.unisinos.es.t2.application.port.in.taskcomment.DeleteTaskCommentService.DeleteTaskCommentCommand;
 import br.com.unisinos.es.t2.application.port.in.taskcomment.GetTaskCommentsService;
 import br.com.unisinos.es.t2.application.port.in.taskcomment.GetTaskCommentsService.GetTaskCommentsCommand;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Comments", description = "Comentários das tarefas")
 @RestController
 @RequestMapping("/tasks/{taskId}/comments")
 @RequiredArgsConstructor

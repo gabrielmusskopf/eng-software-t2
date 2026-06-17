@@ -11,6 +11,7 @@ import br.com.unisinos.es.t2.application.port.in.user.GetUserService;
 import br.com.unisinos.es.t2.application.port.in.user.GetUserService.GetUserCommand;
 import br.com.unisinos.es.t2.application.port.in.user.UpdateUserService;
 import br.com.unisinos.es.t2.application.port.in.user.UpdateUserService.UpdateUserCommand;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Users", description = "Operações relacionadas aos usuários")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor

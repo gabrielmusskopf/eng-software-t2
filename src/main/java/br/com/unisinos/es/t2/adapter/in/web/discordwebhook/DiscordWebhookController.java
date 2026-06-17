@@ -6,6 +6,7 @@ import br.com.unisinos.es.t2.application.port.in.discordwebhook.DeleteDiscordWeb
 import br.com.unisinos.es.t2.application.port.in.discordwebhook.GetDiscordWebhookService;
 import br.com.unisinos.es.t2.application.port.in.discordwebhook.RegisterDiscordWebhookService;
 import br.com.unisinos.es.t2.application.port.in.discordwebhook.RegisterDiscordWebhookService.RegisterDiscordWebhookCommand;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Discord Webhooks", description = "Configuração das notificações do Discord")
 @RestController
 @RequestMapping("/webhooks/discord")
 @RequiredArgsConstructor

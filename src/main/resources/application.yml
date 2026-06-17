@@ -30,6 +30,12 @@ management:
     tags:
       application: ${spring.application.name}
 
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
+
 app:
   jwt:
     private-key: gR43a55V6uTyiQT0tL50YaVW9Iy5dK+19fkhLmd5BjZbgKPXZ83ERMEO0DYjfOlcITkKABf1Pz1PpEK3b5bcKg==
