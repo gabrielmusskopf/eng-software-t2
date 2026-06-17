@@ -2,6 +2,20 @@
 
 Projeto de gerenciamento de tarefas desenvolvido como parte dos requisitos da disciplina de Engenharia de Software.
 
+## Sumário
+
+- [Objetivos](#objetivos)
+- [Arquitetura Hexagonal](#arquitetura-hexagonal)
+- [Como executar](#como-executar)
+- [Como contribuir e Padrões](#como-contribuir-e-padrões)
+- [Configurações](#configurações)
+- [Modelagem de Dados](#modelagem-de-dados)
+- [Padrões de Projeto Utilizados](#padrões-de-projeto-utilizados)
+- [Fluxo de Requisições](#fluxo-de-requisições)
+- [Arquitetura de Eventos](#arquitetura-de-eventos)
+- [Funcionalidades](#funcionalidades)
+- [Testes Automatizados](#testes-automatizados)
+
 ## Objetivos
 O objetivo deste projeto é aplicar boas práticas modernas de engenharia de software e padrões de design na construção de um serviço robusto, focando no desacoplamento, testabilidade e na manutenção de um código limpo e padronizado.
 
@@ -48,9 +62,16 @@ Para garantir a qualidade e a consistência da base de código, seguimos regras 
 
 ## Configurações
 
-| Propriedade           | Descrição                                   | Valor padrão |
-|-----------------------|---------------------------------------------|--------------|
-| `app.metrics.enabled` | Habilita ou desabilita a coleta de métricas | `true`       |
+| Propriedade                                    | Descrição                                          | Valor padrão    |
+|------------------------------------------------|----------------------------------------------------|-----------------|
+| `app.metrics.enabled`                          | Habilita ou desabilita a coleta de métricas        | `true`          |
+| `app.notifications.discord.enabled`            | Habilita ou desabilita notificações Discord        | `true`          |
+| `app.notifications.discord.default-username`   | Nome exibido nas mensagens do Discord              | `Task Manager`  |
+| `app.notifications.discord.connect-timeout`    | Timeout de conexão com a API do Discord            | `3s`            |
+| `app.notifications.discord.read-timeout`       | Timeout de leitura da API do Discord               | `5s`            |
+| `app.notifications.discord.events.task-created.enabled`  | Notificar criação de tarefa         | `true`          |
+| `app.notifications.discord.events.task-deleted.enabled`  | Notificar deleção de tarefa         | `true`          |
+| `app.notifications.discord.events.task-updated.enabled`  | Notificar atualização de tarefa     | `true`          |
 
 ## Modelagem de Dados
 
@@ -141,25 +162,25 @@ Os fluxogramas abaixo descrevem os caminhos principais de cada operação. Todos
 ```mermaid
 flowchart TD
     A([Início]) --> B[POST /users]
-    B --> C{Email já\ncadastrado?}
-    C -- Sim --> D[400 Bad Request\nEmail já existe]
-    C -- Não --> E[Encripta senha\nBCrypt]
-    E --> F[Salva usuário\nMongoDB]
-    F --> G([201 Created\n{ id }])
+    B --> C{Email já cadastrado?}
+    C -- Sim --> D[400 Bad Request]
+    C -- Não --> E[Encripta senha BCrypt]
+    E --> F[Salva usuário no MongoDB]
+    F --> G([201 Created])
 ```
 
 ### Fluxograma: criação de tarefa (`POST /tasks`)
 
 ```mermaid
 flowchart TD
-    A([Início]) --> B{Usuário\nautenticado?}
+    A([Início]) --> B{Usuário autenticado?}
     B -- Não --> C[401 Unauthorized]
-    B -- Sim --> D{Tarefa válida?\ntítulo e descrição\nnão podem ser vazios}
-    D -- Não --> E[400 Bad Request\nmotivo]
-    D -- Sim --> F[Cria tarefa\nuserId do JWT\nstatus = BACKLOG]
+    B -- Sim --> D{Título e descrição preenchidos?}
+    D -- Não --> E[400 Bad Request]
+    D -- Sim --> F[Cria tarefa com status BACKLOG]
     F --> G[Salva no MongoDB]
     G --> H[Publica TaskCreatedEvent]
-    H --> I([201 Created\n{ id }])
+    H --> I([201 Created])
 ```
 
 ### Fluxograma: atualização de tarefa (`PUT /tasks/{id}`)
@@ -168,12 +189,12 @@ flowchart TD
 flowchart TD
     A([Início]) --> B{Autenticado?}
     B -- Não --> C[401]
-    B -- Sim --> D{Tarefa\nexiste?}
+    B -- Sim --> D{Tarefa existe?}
     D -- Não --> E[404 Not Found]
-    D -- Sim --> F[Compara campos\ntitle / description\nassignee / status]
-    F --> G[Gera eventos\npor mudança detectada]
-    G --> H[Salva tarefa\natualizada]
-    H --> I[Publica TaskUpdatedEvent\n+ sub-eventos]
+    D -- Sim --> F[Compara campos alterados]
+    F --> G[Gera eventos por mudança]
+    G --> H[Salva tarefa atualizada]
+    H --> I[Publica TaskUpdatedEvent]
     I --> J([200 OK])
 ```
 
@@ -181,14 +202,14 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A[Serviço publica\nTaskCreatedEvent] --> B[SpringEventPublisher]
+    A[Publica TaskCreatedEvent] --> B[SpringEventPublisher]
     B --> C[Spring Message Bus]
-    C --> D[NotificationEventHandler\n@EventListener]
-    C --> E[MicrometerMetricEventHandler\n@EventListener]
-    D --> F[TaskCreatedDiscordNotification\nStrategy]
+    C --> D[NotificationEventHandler]
+    C --> E[MicrometerMetricEventHandler]
+    D --> F[TaskCreatedDiscordNotification]
     F --> G[DiscordNotificationService]
-    G --> H[Busca webhookUrl\nno DiscordWebhookConfig]
-    H --> I[HTTP POST\nDiscord API]
+    G --> H[Busca webhookUrl]
+    H --> I[HTTP POST Discord API]
 ```
 
 ---
