@@ -2,6 +2,20 @@
 
 Projeto de gerenciamento de tarefas desenvolvido como parte dos requisitos da disciplina de Engenharia de Software.
 
+## Sumário
+
+- [Objetivos](#objetivos)
+- [Arquitetura Hexagonal](#arquitetura-hexagonal)
+- [Como executar](#como-executar)
+- [Como contribuir e Padrões](#como-contribuir-e-padrões)
+- [Configurações](#configurações)
+- [Modelagem de Dados](#modelagem-de-dados)
+- [Padrões de Projeto Utilizados](#padrões-de-projeto-utilizados)
+- [Fluxo de Requisições](#fluxo-de-requisições)
+- [Arquitetura de Eventos](#arquitetura-de-eventos)
+- [Funcionalidades](#funcionalidades)
+- [Testes Automatizados](#testes-automatizados)
+
 ## Objetivos
 O objetivo deste projeto é aplicar boas práticas modernas de engenharia de software e padrões de design na construção de um serviço robusto, focando no desacoplamento, testabilidade e na manutenção de um código limpo e padronizado.
 
@@ -48,9 +62,356 @@ Para garantir a qualidade e a consistência da base de código, seguimos regras 
 
 ## Configurações
 
-| Propriedade           | Descrição                                   | Valor padrão |
-|-----------------------|---------------------------------------------|--------------|
-| `app.metrics.enabled` | Habilita ou desabilita a coleta de métricas | `true`       |
+| Propriedade                                    | Descrição                                          | Valor padrão    |
+|------------------------------------------------|----------------------------------------------------|-----------------|
+| `app.metrics.enabled`                          | Habilita ou desabilita a coleta de métricas        | `true`          |
+| `app.notifications.discord.enabled`            | Habilita ou desabilita notificações Discord        | `true`          |
+| `app.notifications.discord.default-username`   | Nome exibido nas mensagens do Discord              | `Task Manager`  |
+| `app.notifications.discord.connect-timeout`    | Timeout de conexão com a API do Discord            | `3s`            |
+| `app.notifications.discord.read-timeout`       | Timeout de leitura da API do Discord               | `5s`            |
+| `app.notifications.discord.events.task-created.enabled`  | Notificar criação de tarefa         | `true`          |
+| `app.notifications.discord.events.task-deleted.enabled`  | Notificar deleção de tarefa         | `true`          |
+| `app.notifications.discord.events.task-updated.enabled`  | Notificar atualização de tarefa     | `true`          |
+
+## Modelagem de Dados
+
+O banco de dados utilizado é o **MongoDB** (NoSQL). A escolha se justifica pela natureza heterogênea dos eventos de tarefa: cada tipo de evento (`TaskCreatedEvent`, `TaskStatusChangedEvent`, `TaskReassignedEvent`, etc.) carrega campos distintos, o que se encaixa bem no modelo de documentos sem schema rígido. Além disso, o MongoDB simplifica o armazenamento de subdocumentos aninhados, como os campos extras de cada evento.
+
+### Coleções
+
+**`users`** — Armazena os usuários do sistema.
+
+| Campo       | Tipo        | Descrição                            |
+|-------------|-------------|--------------------------------------|
+| `_id`       | String      | Identificador único                  |
+| `name`      | String      | Nome do usuário                      |
+| `email`     | String      | E-mail (único)                       |
+| `password`  | String      | Senha encriptada com BCrypt          |
+| `enabled`   | Boolean     | Soft delete — `false` = removido     |
+| `createdAt` | DateTime    | Data de criação                      |
+| `updatedAt` | DateTime    | Data da última atualização           |
+
+**`tasks`** — Armazena as tarefas colaborativas.
+
+| Campo             | Tipo     | Descrição                                               |
+|-------------------|----------|---------------------------------------------------------|
+| `_id`             | String   | Identificador único                                     |
+| `title`           | String   | Título da tarefa                                        |
+| `description`     | String   | Descrição da tarefa                                     |
+| `userId`          | String   | ID do usuário responsável                               |
+| `status`          | String   | Status atual: `BACKLOG`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED` |
+| `statusUpdatedAt` | DateTime | Momento da última mudança de status                     |
+| `deleted`         | Boolean  | Soft delete — `true` = removida                         |
+| `createdAt`       | DateTime | Data de criação                                         |
+| `updatedAt`       | DateTime | Data da última atualização                              |
+| `version`         | Long     | Controle de versão otimista                             |
+
+**`task_events`** — Histórico de eventos ocorridos nas tarefas. Cada documento representa uma ação (criação, atualização, deleção, mudança de status, etc.) com campos específicos por tipo.
+
+| Campo       | Tipo     | Descrição                                                                                        |
+|-------------|----------|--------------------------------------------------------------------------------------------------|
+| `_id`       | String   | Identificador único                                                                              |
+| `taskId`    | String   | Referência à tarefa                                                                              |
+| `userId`    | String   | Quem realizou a ação                                                                             |
+| `type`      | String   | Tipo do evento: `TASK_CREATED`, `TASK_DELETED`, `TASK_UPDATED`, `TASK_STATUS_CHANGED`, `TASK_REASSIGNED`, `TASK_TITLE_CHANGED`, `TASK_DESCRIPTION_CHANGED` |
+| `createdAt` | DateTime | Momento do evento                                                                                |
+| `...`       | —        | Campos adicionais conforme o tipo (ex: `oldStatus`, `newStatus`, `oldUserId`, `newUserId`, etc.) |
+
+**`task_comments`** — Comentários associados a tarefas.
+
+| Campo       | Tipo     | Descrição                        |
+|-------------|----------|----------------------------------|
+| `_id`       | String   | Identificador único              |
+| `taskId`    | String   | Referência à tarefa              |
+| `userId`    | String   | Usuário que comentou             |
+| `content`   | String   | Conteúdo do comentário           |
+| `enabled`   | Boolean  | Soft delete — `false` = removido |
+| `createdAt` | DateTime | Data de criação                  |
+| `updatedAt` | DateTime | Data da última atualização       |
+
+**`discord_webhook_configs`** — Configurações de webhook Discord por usuário.
+
+| Campo        | Tipo     | Descrição                          |
+|--------------|----------|------------------------------------|
+| `_id`        | String   | Identificador único                |
+| `userId`     | String   | Referência ao usuário (1:1)        |
+| `webhookUrl` | String   | URL do webhook no Discord          |
+| `username`   | String   | Nome exibido nas mensagens         |
+| `createdAt`  | DateTime | Data de criação                    |
+| `updatedAt`  | DateTime | Data da última atualização         |
+
+## Padrões de Projeto Utilizados
+
+### Observer
+Utilizado para desacoplar a publicação de eventos das ações que reagem a eles. Ao concluir uma operação (criar, atualizar ou deletar uma tarefa), o serviço publica um evento via `PublishEventPort`. Os handlers (`NotificationEventHandler` e `MicrometerMetricEventHandler`) escutam esses eventos de forma independente e reagem conforme sua responsabilidade — um dispara notificações no Discord, o outro coleta métricas.
+
+Isso garante que o domínio não conhece nada sobre Discord ou Prometheus.
+
+### Strategy
+Utilizado no sistema de notificações Discord. A classe abstrata `AbstractDiscordNotification<E>` define o esqueleto do algoritmo de notificação, e cada subclasse (`TaskCreatedDiscordNotification`, `TaskDeletedDiscordNotification`, `TaskUpdatedDiscordNotification`) implementa os detalhes específicos: título, cor, destinatários e campos da mensagem. O `DiscordNotificationService` opera sobre a abstração, sem conhecer os tipos concretos.
+
+### Ports and Adapters (Arquitetura Hexagonal)
+O padrão central do projeto. Cada dependência externa (MongoDB, Discord, Spring Security, Micrometer) é acessada exclusivamente por meio de interfaces (portas), implementadas por adaptadores. O domínio nunca importa classes de infraestrutura diretamente.
+
+## Fluxo de Requisições
+
+Os fluxogramas abaixo descrevem os caminhos principais de cada operação. Todos os endpoints protegidos seguem o mesmo padrão inicial: validação do JWT → execução → resposta.
+
+### Fluxograma: criação de usuário (`POST /users`)
+
+```mermaid
+flowchart TD
+    A([Início]) --> B[POST /users]
+    B --> C{Email já cadastrado?}
+    C -- Sim --> D[400 Bad Request]
+    C -- Não --> E[Encripta senha BCrypt]
+    E --> F[Salva usuário no MongoDB]
+    F --> G([201 Created])
+```
+
+### Fluxograma: criação de tarefa (`POST /tasks`)
+
+```mermaid
+flowchart TD
+    A([Início]) --> B{Usuário autenticado?}
+    B -- Não --> C[401 Unauthorized]
+    B -- Sim --> D{Título e descrição preenchidos?}
+    D -- Não --> E[400 Bad Request]
+    D -- Sim --> F[Cria tarefa com status BACKLOG]
+    F --> G[Salva no MongoDB]
+    G --> H[Publica TaskCreatedEvent]
+    H --> I([201 Created])
+```
+
+### Fluxograma: atualização de tarefa (`PUT /tasks/{id}`)
+
+```mermaid
+flowchart TD
+    A([Início]) --> B{Autenticado?}
+    B -- Não --> C[401]
+    B -- Sim --> D{Tarefa existe?}
+    D -- Não --> E[404 Not Found]
+    D -- Sim --> F[Compara campos alterados]
+    F --> G[Gera eventos por mudança]
+    G --> H[Salva tarefa atualizada]
+    H --> I[Publica TaskUpdatedEvent]
+    I --> J([200 OK])
+```
+
+### Fluxograma: notificação Discord (pós-evento)
+
+```mermaid
+flowchart LR
+    A[Publica TaskCreatedEvent] --> B[SpringEventPublisher]
+    B --> C[Spring Message Bus]
+    C --> D[NotificationEventHandler]
+    C --> E[MicrometerMetricEventHandler]
+    D --> F[TaskCreatedDiscordNotification]
+    F --> G[DiscordNotificationService]
+    G --> H[Busca webhookUrl]
+    H --> I[HTTP POST Discord API]
+```
+
+---
+
+### Autenticação
+
+Todos os endpoints, exceto `POST /users` e `POST /auth/login`, exigem o header:
+
+```
+Authorization: Bearer <token>
+```
+
+O token JWT é obtido no login e deve ser enviado em todas as requisições subsequentes.
+
+**`POST /auth/login`**
+```json
+// Request
+{ "email": "usuario@email.com", "password": "senha123" }
+
+// Response 200
+{ "token": "eyJhbGci..." }
+```
+
+**`POST /auth/logout`** — Invalida a sessão do usuário autenticado. Retorna `200 OK`.
+
+---
+
+### Usuários
+
+**`POST /users`** — Cria um novo usuário. Não requer autenticação.
+```json
+// Request
+{ "name": "Vítor", "email": "vitor@email.com", "password": "senha123" }
+
+// Response 201
+{ "id": "abc123" }
+```
+> Retorna `400` se o e-mail já estiver cadastrado.
+
+**`GET /users/{id}`** — Retorna dados de um usuário específico.
+```json
+// Response 200
+{ "id": "abc123", "name": "Vítor", "email": "vitor@email.com" }
+```
+
+**`GET /users`** — Retorna os dados do usuário autenticado (equivale a `/me`).
+
+**`PUT /users/{id}`** — Atualiza nome e e-mail do usuário.
+```json
+// Request
+{ "name": "Vitor D.", "email": "novo@email.com" }
+```
+
+**`DELETE /users/{id}`** — Remove o usuário (soft delete). Retorna `200 OK`.
+
+---
+
+### Tarefas
+
+**`POST /tasks`** — Cria uma nova tarefa. A tarefa é criada com status `BACKLOG` e atribuída ao usuário autenticado.
+```json
+// Request
+{ "title": "Implementar endpoint", "description": "Criar o GET /tasks/{id}" }
+
+// Response 201
+{ "id": "task123" }
+```
+
+**`GET /tasks/{id}`** — Retorna os detalhes de uma tarefa.
+```json
+// Response 200
+{ "id": "task123", "title": "Implementar endpoint", "description": "...", "assigneeId": "abc123" }
+```
+> Retorna `404` se a tarefa não existir.
+
+**`GET /tasks?assignedTo={userId}`** — Lista todas as tarefas atribuídas a um usuário.
+
+**`PUT /tasks/{id}`** — Atualiza título, descrição, status e/ou responsável da tarefa. Apenas os campos enviados são processados. Cada alteração gera um evento específico no histórico.
+```json
+// Request
+{ "title": "Novo título", "description": "Nova descrição", "assigneeId": "xyz456", "status": "IN_PROGRESS" }
+```
+> Valores aceitos para `status`: `BACKLOG`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`.
+
+**`DELETE /tasks/{id}`** — Remove a tarefa (soft delete). Gera um evento `TASK_DELETED`. Retorna `200 OK`.
+
+---
+
+### Comentários em Tarefas
+
+**`POST /tasks/{taskId}/comments`** — Adiciona um comentário à tarefa. O comentário é associado ao usuário autenticado.
+```json
+// Request
+{ "content": "Precisa de revisão antes de fechar." }
+
+// Response 201
+{ "id": "c1", "taskId": "task123", "userId": "abc123", "content": "...", "createdAt": "2026-06-16T10:00:00" }
+```
+
+**`GET /tasks/{taskId}/comments`** — Lista todos os comentários de uma tarefa.
+```json
+// Response 200
+[
+  { "id": "c1", "taskId": "task123", "userId": "abc123", "content": "...", "createdAt": "..." }
+]
+```
+
+**`DELETE /tasks/{taskId}/comments/{commentId}`** — Remove um comentário (soft delete). Apenas o autor pode remover. Retorna `200 OK`.
+
+---
+
+### Webhooks Discord
+
+Cada usuário pode configurar um webhook Discord para receber notificações sobre suas tarefas. As notificações são disparadas automaticamente ao criar, atualizar ou deletar uma tarefa.
+
+**`PUT /webhooks/discord`** — Cadastra ou atualiza o webhook do usuário autenticado.
+```json
+// Request
+{ "webhookUrl": "https://discord.com/api/webhooks/..." }
+
+// Response 200
+{ "userId": "abc123", "webhookUrl": "https://...", "username": "Task Manager" }
+```
+
+**`GET /webhooks/discord`** — Retorna a configuração atual do webhook do usuário autenticado.
+
+**`DELETE /webhooks/discord`** — Remove a configuração de webhook do usuário autenticado. Retorna `200 OK`.
+
+#### Formato do payload enviado ao Discord
+
+Quando um evento ocorre, a aplicação envia um HTTP POST no `webhookUrl` configurado com o seguinte corpo:
+
+```json
+{
+  "username": "Task Manager",
+  "embeds": [
+    {
+      "title": "Tarefa criada",
+      "color": 3843421,
+      "fields": [
+        { "name": "Tarefa",      "value": "Título da tarefa",  "inline": true },
+        { "name": "Responsável", "value": "Nome do usuário",   "inline": true },
+        { "name": "Criado por",  "value": "Nome do autor",     "inline": true }
+      ]
+    }
+  ]
+}
+```
+
+O `username` é configurável via `app.notifications.discord.default-username`. A cor do embed varia por tipo de evento. Cada notificação só é enviada para usuários que tenham um `DiscordWebhookConfig` cadastrado. Os eventos podem ser desabilitados individualmente via `application.yml`:
+
+```yaml
+app:
+  notifications:
+    discord:
+      enabled: true
+      events:
+        task-created:
+          enabled: true
+        task-deleted:
+          enabled: true
+        task-updated:
+          enabled: true
+```
+
+## Arquitetura de Eventos
+
+O sistema utiliza o mecanismo de eventos do Spring (`ApplicationEventPublisher`) para comunicação assíncrona interna entre camadas. O fluxo é:
+
+```
+Serviço de domínio
+      │
+      │  publica via PublishEventPort
+      ▼
+EventPublisherSpringAdapter  ──►  Spring Message Bus
+                                        │
+                              ┌─────────┴──────────┐
+                              ▼                    ▼
+               NotificationEventHandler   MicrometerMetricEventHandler
+                              │
+                    (por tipo de evento)
+                              │
+                    DiscordNotificationService
+                              │
+                    DiscordWebhookClient  ──►  Discord API
+```
+
+Os eventos publicados e seus tipos são:
+
+| Evento                        | Gatilho                                 |
+|-------------------------------|-----------------------------------------|
+| `TaskCreatedEvent`            | Criação de uma tarefa                   |
+| `TaskDeletedEvent`            | Deleção de uma tarefa                   |
+| `TaskUpdatedEvent`            | Qualquer atualização (evento agregador) |
+| `TaskReassignedEvent`         | Mudança de responsável                  |
+| `TaskTitleChangedEvent`       | Mudança de título                       |
+| `TaskDescriptionChangedEvent` | Mudança de descrição                    |
+| `TaskStatusChangedEvent`      | Mudança de status                       |
+
+O `NotificationEventHandler` escuta `TaskCreatedEvent`, `TaskDeletedEvent` e `TaskUpdatedEvent`, e delega ao `DiscordNotificationService`, que por sua vez usa o padrão **Strategy** para montar a mensagem correta conforme o tipo do evento.
+
+O `MicrometerMetricEventHandler` escuta todos os eventos e atualiza os contadores e gauges do Prometheus. Ver seção **Métricas** para detalhes.
 
 ## Funcionalidades
 
@@ -81,3 +442,27 @@ No diretório `dashboards` estão os arquivos de dashboard usados, basta baixar 
 
 ![Dashboard de métricas](./docs/metricas.png)
 
+## Testes Automatizados
+
+Os testes cobrem a camada de serviços (domínio), que é onde reside a lógica de negócio. A estratégia adotada é o teste unitário com mocks via **Mockito**, complementado por testes de arquitetura com **ArchUnit**.
+
+A cobertura atual da camada `service` é de **69%** (16/23 classes), atendendo ao requisito mínimo de 60%.
+
+### Testes de Unidade
+Cada serviço é testado isoladamente, com todas as dependências mockadas. Os objetos de domínio são gerados com **EasyRandom** para evitar a construção manual de fixtures. Cenários cobertos incluem fluxo feliz e casos de erro (usuário não autenticado, entidade não encontrada, etc.).
+
+Classes testadas:
+* `LoginImpl` — autenticação com e-mail/senha inválidos
+* `DeleteTaskImpl` — deleção com tarefa inexistente e usuário não autenticado
+* `GetTasksByUserImpl` — listagem de tarefas por usuário
+* `TaskCreatedDiscordNotification`, `TaskDeletedDiscordNotification`, `TaskUpdatedDiscordNotification` — montagem e envio de notificações Discord
+* `DiscordNotificationService` — orquestração de notificações
+* `CreateTaskCommentImpl`, `DeleteTaskCommentImpl`, `GetTaskCommentsImpl` — CRUD de comentários
+
+### Testes de Arquitetura
+A classe `ArchitectureTest` utiliza **ArchUnit** para verificar em tempo de execução que as regras da Arquitetura Hexagonal são respeitadas: adaptadores não acessam diretamente outros adaptadores, o domínio não importa classes de infraestrutura, etc.
+
+Para rodar todos os testes:
+```bash
+./gradlew test
+```
